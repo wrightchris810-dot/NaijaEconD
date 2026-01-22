@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fox Business Dashboard - Financial Intelligence</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="logo">
+                <span class="fox-red">FOX</span>
+                <span class="business-blue">BUSINESS</span>
+                <span class="dashboard-tag">DASHBOARD</span>
+            </div>
+        </div>
+        <div class="header-info">
+            <div class="market-status">
+                <span id="market-status" class="market-open">MARKETS OPEN</span>
+                <span id="current-time" class="time-display">Loading...</span>
+            </div>
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <span class="stat-label">DOW</span>
+                    <span id="dow-price" class="stat-value">34,500.12</span>
+                    <span id="dow-change" class="stat-change positive">+0.45%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">S&P 500</span>
+                    <span id="sp500-price" class="stat-value">4,450.67</span>
+                    <span id="sp500-change" class="stat-change positive">+0.32%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">NASDAQ</span>
+                    <span id="nasdaq-price" class="stat-value">13,750.89</span>
+                    <span id="nasdaq-change" class="stat-change negative">-0.12%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">VIX</span>
+                    <span id="vix-price" class="stat-value">15.34</span>
+                    <span id="vix-change" class="stat-change negative">-2.1%</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <div class="sidebar">
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active"><i class="fas fa-chart-line"></i> Market Overview</a>
+                <a href="#" class="nav-item"><i class="fas fa-chart-bar"></i> Economic Indicators</a>
+                <a href="#" class="nav-item"><i class="fas fa-globe-americas"></i> Global Markets</a>
+                <a href="#" class="nav-item"><i class="fas fa-coins"></i> Commodities</a>
+                <a href="#" class="nav-item"><i class="fas fa-percentage"></i> Interest Rates</a>
+                <a href="#" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> Fiscal Data</a>
+                <a href="#" class="nav-item"><i class="fas fa-newspaper"></i> Financial News</a>
+            </nav>
+            
+            <div class="api-status">
+                <h3><i class="fas fa-plug"></i> API Status</h3>
+                <div class="status-item">
+                    <span>Alpha Vantage</span>
+                    <span class="status-dot active"></span>
+                </div>
+                <div class="status-item">
+                    <span>FRED Economic Data</span>
+                    <span class="status-dot active"></span>
+                </div>
+                <div class="status-item">
+                    <span>NewsAPI</span>
+                    <span class="status-dot active"></span>
+                </div>
+                <div class="status-item">
+                    <span>Exchange Rates</span>
+                    <span class="status-dot active"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Row 1: Key Indicators -->
+            <div class="row">
+                <div class="card large">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-line"></i> Major Indices Performance</h2>
+                        <select id="chart-timeframe" class="time-selector">
+                            <option value="1D">1 Day</option>
+                            <option value="5D">5 Days</option>
+                            <option value="1M">1 Month</option>
+                            <option value="3M">3 Months</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="indicesChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-money-bill-wave"></i> Key Rates</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="rate-item">
+                            <span>Federal Funds Rate</span>
+                            <span id="fed-funds-rate" class="rate-value">5.33%</span>
+                        </div>
+                        <div class="rate-item">
+                            <span>10-Year Treasury</span>
+                            <span id="treasury-10y" class="rate-value">4.25%</span>
+                            <span id="treasury-change" class="rate-change positive">+0.02%</span>
+                        </div>
+                        <div class="rate-item">
+                            <span>30-Year Mortgage</span>
+                            <span id="mortgage-30y" class="rate-value">7.12%</span>
+                        </div>
+                        <div class="rate-item">
+                            <span>Prime Rate</span>
+                            <span id="prime-rate" class="rate-value">8.50%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Economic Data -->
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-shopping-cart"></i> Inflation Data</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="metric">
+                            <span class="metric-label">CPI (YoY)</span>
+                            <span id="cpi-rate" class="metric-value">3.2%</span>
+                            <div class="metric-trend">
+                                <i class="fas fa-arrow-up trend-up"></i>
+                                <span>Last: 3.1%</span>
+                            </div>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Core CPI</span>
+                            <span id="core-cpi" class="metric-value">4.0%</span>
+                            <div class="metric-trend">
+                                <i class="fas fa-minus trend-neutral"></i>
+                                <span>Unchanged</span>
+                            </div>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">PCE Price Index</span>
+                            <span id="pce-rate" class="metric-value">2.6%</span>
+                            <div class="metric-trend">
+                                <i class="fas fa-arrow-down trend-down"></i>
+                                <span>-0.1%</span>
+                            </div>
+                        </div>
+                        <div id="inflation-chart" class="mini-chart"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-briefcase"></i> Employment</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="metric">
+                            <span class="metric-label">Unemployment Rate</span>
+                            <span id="unemployment-rate" class="metric-value">3.8%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Nonfarm Payrolls</span>
+                            <span id="payrolls" class="metric-value">+199K</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Initial Claims</span>
+                            <span id="jobless-claims" class="metric-value">202K</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Participation Rate</span>
+                            <span id="participation-rate" class="metric-value">62.8%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-industry"></i> GDP & Production</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="metric">
+                            <span class="metric-label">GDP Growth (QoQ)</span>
+                            <span id="gdp-growth" class="metric-value">+4.9%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Industrial Production</span>
+                            <span id="industrial-production" class="metric-value">+0.6%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Retail Sales</span>
+                            <span id="retail-sales" class="metric-value">+0.3%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Manufacturing PMI</span>
+                            <span id="pmi" class="metric-value">49.4</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 3: Commodities & Currencies -->
+            <div class="row">
+                <div class="card medium">
+                    <div class="card-header">
+                        <h2><i class="fas fa-gas-pump"></i> Commodities</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="commodities-grid">
+                            <div class="commodity">
+                                <span class="commodity-name">Crude Oil</span>
+                                <span id="oil-price" class="commodity-price">$71.45</span>
+                                <span id="oil-change" class="commodity-change negative">-1.2%</span>
+                            </div>
+                            <div class="commodity">
+                                <span class="commodity-name">Natural Gas</span>
+                                <span id="gas-price" class="commodity-price">$2.67</span>
+                                <span id="gas-change" class="commodity-change positive">+0.8%</span>
+                            </div>
+                            <div class="commodity">
+                                <span class="commodity-name">Gold</span>
+                                <span id="gold-price" class="commodity-price">$1,980.50</span>
+                                <span id="gold-change" class="commodity-change positive">+0.5%</span>
+                            </div>
+                            <div class="commodity">
+                                <span class="commodity-name">Silver</span>
+                                <span id="silver-price" class="commodity-price">$23.12</span>
+                                <span id="silver-change" class="commodity-change positive">+0.3%</span>
+                            </div>
+                            <div class="commodity">
+                                <span class="commodity-name">Copper</span>
+                                <span id="copper-price" class="commodity-price">$3.85</span>
+                                <span id="copper-change" class="commodity-change negative">-0.4%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card medium">
+                    <div class="card-header">
+                        <h2><i class="fas fa-exchange-alt"></i> Forex (vs USD)</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="forex-grid">
+                            <div class="currency">
+                                <span class="currency-flag">🇪🇺</span>
+                                <span class="currency-name">EUR/USD</span>
+                                <span id="eur-rate" class="currency-rate">1.0854</span>
+                                <span id="eur-change" class="currency-change negative">-0.12%</span>
+                            </div>
+                            <div class="currency">
+                                <span class="currency-flag">🇬🇧</span>
+                                <span class="currency-name">GBP/USD</span>
+                                <span id="gbp-rate" class="currency-rate">1.2650</span>
+                                <span id="gbp-change" class="currency-change positive">+0.08%</span>
+                            </div>
+                            <div class="currency">
+                                <span class="currency-flag">🇯🇵</span>
+                                <span class="currency-name">USD/JPY</span>
+                                <span id="jpy-rate" class="currency-rate">142.35</span>
+                                <span id="jpy-change" class="currency-change positive">+0.25%</span>
+                            </div>
+                            <div class="currency">
+                                <span class="currency-flag">🇨🇭</span>
+                                <span class="currency-name">USD/CHF</span>
+                                <span id="chf-rate" class="currency-rate">0.8670</span>
+                                <span id="chf-change" class="currency-change negative">-0.15%</span>
+                            </div>
+                            <div class="currency">
+                                <span class="currency-flag">🇨🇦</span>
+                                <span class="currency-name">USD/CAD</span>
+                                <span id="cad-rate" class="currency-rate">1.3540</span>
+                                <span id="cad-change" class="currency-change positive">+0.10%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 4: News Feed -->
+            <div class="row">
+                <div class="card full-width">
+                    <div class="card-header">
+                        <h2><i class="fas fa-newspaper"></i> Latest Financial News</h2>
+                        <button id="refresh-news" class="btn-refresh"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="news-feed" class="news-feed">
+                            <div class="news-item loading">Loading financial news...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <span>Fox Business Dashboard v1.0 | Real-time Financial Data</span>
+                <span>Data Sources: Alpha Vantage, FRED, NewsAPI, ExchangeRate-API</span>
+                <span>Last Updated: <span id="last-updated">Loading...</span></span>
+            </div>
+            <div class="footer-disclaimer">
+                <span><i class="fas fa-exclamation-triangle"></i> Data is delayed and for informational purposes only.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
