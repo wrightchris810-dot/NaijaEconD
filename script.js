@@ -170,3 +170,263 @@ async function updateEconomicData() {
                 element.className = id.includes('treasury') ? `rate-change ${isPositive ? 'positive' : 'negative'}` : '';
             }
         }
+    });
+}
+
+// Update commodities data
+async function updateCommodities() {
+    console.log('Updating commodities data...');
+    
+    const commodities = {
+        'oil': { price: 71.45, change: -1.2 },
+        'gas': { price: 2.67, change: 0.8 },
+        'gold': { price: 1980.50, change: 0.5 },
+        'silver': { price: 23.12, change: 0.3 },
+        'copper': { price: 3.85, change: -0.4 }
+    };
+    
+    Object.entries(commodities).forEach(([commodity, data]) => {
+        const priceElement = document.getElementById(`${commodity}-price`);
+        const changeElement = document.getElementById(`${commodity}-change`);
+        
+        if (priceElement && changeElement) {
+            // Add small random variation
+            const variation = (Math.random() - 0.5) * 0.3;
+            const newPrice = data.price * (1 + variation / 100);
+            const newChange = data.change + variation;
+            
+            priceElement.textContent = formatPrice(newPrice, commodity === 'gas' ? 2 : 2);
+            changeElement.textContent = `${newChange >= 0 ? '+' : ''}${newChange.toFixed(1)}%`;
+            changeElement.className = `commodity-change ${newChange >= 0 ? 'positive' : 'negative'}`;
+        }
+    });
+}
+
+// Update forex data
+async function updateForex() {
+    console.log('Updating forex data...');
+    
+    const forexPairs = {
+        'eur': { rate: 1.0854, change: -0.12 },
+        'gbp': { rate: 1.2650, change: 0.08 },
+        'jpy': { rate: 142.35, change: 0.25 },
+        'chf': { rate: 0.8670, change: -0.15 },
+        'cad': { rate: 1.3540, change: 0.10 }
+    };
+    
+    Object.entries(forexPairs).forEach(([currency, data]) => {
+        const rateElement = document.getElementById(`${currency}-rate`);
+        const changeElement = document.getElementById(`${currency}-change`);
+        
+        if (rateElement && changeElement) {
+            // Add small random variation
+            const variation = (Math.random() - 0.5) * 0.05;
+            const newRate = data.rate + variation / 100;
+            const newChange = data.change + variation * 10;
+            
+            rateElement.textContent = newRate.toFixed(4);
+            changeElement.textContent = `${newChange >= 0 ? '+' : ''}${newChange.toFixed(2)}%`;
+            changeElement.className = `currency-change ${newChange >= 0 ? 'positive' : 'negative'}`;
+        }
+    });
+}
+
+// Load financial news
+async function loadNews() {
+    console.log('Loading financial news...');
+    
+    const newsFeed = document.getElementById('news-feed');
+    if (!newsFeed) return;
+    
+    // Show loading state
+    newsFeed.innerHTML = '<div class="news-item loading">Loading latest financial news...</div>';
+    
+    try {
+        // Fallback news data
+        const fallbackNews = [
+            {
+                title: 'Federal Reserve Holds Rates Steady, Signals Caution on Future Hikes',
+                source: 'Financial Times',
+                time: '2 hours ago'
+            },
+            {
+                title: 'Tech Stocks Rally as AI Investments Drive Record Quarterly Earnings',
+                source: 'Bloomberg',
+                time: '3 hours ago'
+            },
+            {
+                title: 'Oil Prices Volatile Amid Middle East Tensions and Supply Concerns',
+                source: 'Reuters',
+                time: '4 hours ago'
+            },
+            {
+                title: 'Consumer Confidence Rises Despite Inflation Concerns, Retail Data Shows',
+                source: 'Wall Street Journal',
+                time: '5 hours ago'
+            },
+            {
+                title: 'Global Central Banks Coordinate Efforts to Stabilize Currency Markets',
+                source: 'CNBC',
+                time: '6 hours ago'
+            }
+        ];
+        
+        // Display news
+        newsFeed.innerHTML = '';
+        fallbackNews.forEach((news, index) => {
+            const newsItem = document.createElement('div');
+            newsItem.className = 'news-item';
+            newsItem.innerHTML = `
+                <span class="news-title">${news.title}</span>
+                <div>
+                    <span class="news-source">${news.source}</span>
+                    <span class="news-time">${news.time}</span>
+                </div>
+            `;
+            newsFeed.appendChild(newsItem);
+        });
+        
+    } catch (error) {
+        console.error('Error loading news:', error);
+        newsFeed.innerHTML = '<div class="news-item">Unable to load news. Please check your API configuration.</div>';
+    }
+}
+
+// Update chart based on selected timeframe
+async function updateChart() {
+    const timeframe = document.getElementById('chart-timeframe').value;
+    console.log(`Updating chart for timeframe: ${timeframe}`);
+    
+    const ctx = document.getElementById('indicesChart').getContext('2d');
+    
+    // Sample data for different timeframes
+    const dataByTimeframe = {
+        '1D': generateIntradayData(),
+        '5D': generateFiveDayData(),
+        '1M': generateMonthlyData(),
+        '3M': generateQuarterlyData()
+    };
+    
+    const data = dataByTimeframe[timeframe] || dataByTimeframe['1D'];
+    
+    // Destroy existing chart if it exists
+    if (window.indicesChart) {
+        window.indicesChart.destroy();
+    }
+    
+    // Create new chart
+    window.indicesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [
+                {
+                    label: 'DOW JONES',
+                    data: data.dow,
+                    borderColor: '#00c853',
+                    backgroundColor: 'rgba(0, 200, 83, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4
+                },
+                {
+                    label: 'S&P 500',
+                    data: data.sp500,
+                    borderColor: '#2196f3',
+                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4
+                },
+                {
+                    label: 'NASDAQ',
+                    data: data.nasdaq,
+                    borderColor: '#ff9800',
+                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#ffffff',
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff'
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#cccccc'
+                    }
+                },
+                y: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#cccccc',
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Helper functions for chart data generation
+function generateIntradayData() {
+    const labels = ['9:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00'];
+    const baseDow = 34500 + Math.random() * 200 - 100;
+    const baseSP500 = 4450 + Math.random() * 20 - 10;
+    const baseNasdaq = 13750 + Math.random() * 50 - 25;
+    
+    return {
+        labels,
+        dow: labels.map((_, i) => baseDow + (i * 10) + Math.random() * 50 - 25),
+        sp500: labels.map((_, i) => baseSP500 + (i * 1) + Math.random() * 5 - 2.5),
+        nasdaq: labels.map((_, i) => baseNasdaq + (i * 3) + Math.random() * 15 - 7.5)
+    };
+}
+
+function generateFiveDayData() {
+    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    return {
+        labels,
+        dow: [34320, 34450, 34580, 34620, 34500],
+        sp500: [4430, 4445, 4455, 4460, 4450],
+        nasdaq: [13680, 13720, 13780, 13800, 13750]
+    };
+}
+
+// Format price with commas and currency symbol
+function formatPrice(price, decimals = 2) {
+    if (price < 1) {
+        return `$${price.toFixed(decimals)}`;
+    }
+    return `$${price.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
+}
+
+// Fallback function if APIs fail
+function useFallbackData() {
+    console.log('Using fallback data');
+    // All our current data is already fallback, so just update timestamp
+    document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+}
